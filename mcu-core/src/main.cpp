@@ -4,7 +4,7 @@
 #define BT_RX 3
 #define BT_TX 4
 
-#define INPUT_A 9
+#define INPUT_A A0
 
 #define BUZZER 13
 #define LED_STANDBY 12
@@ -41,9 +41,10 @@ void loop() {
     char recv = bluetooth.read();
     if (recv == STARTING) {
       ledIndicator(LED_START);
+      int statePoint = digitalRead(INPUT_A);
       unsigned long finalCounter = 0, startCounter = millis();
       while (true) {
-        if (digitalRead(INPUT_A)) {
+        if (statePoint != digitalRead(INPUT_A)) {
           break;
         }
         finalCounter = millis();
