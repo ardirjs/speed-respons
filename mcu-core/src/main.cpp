@@ -11,7 +11,10 @@
 #define LED_START 11
 #define LED_SENDING 10
 
+#define CONNECT '0'
 #define STARTING '1'
+#define BUZZERON '2'
+#define BUZZEROFF '3'
 
 #define NUM_INPUT 1
 #define NUM_OUTPUT 4
@@ -36,11 +39,23 @@ void setup() {
 }
 
 void loop() {
-  ledIndicator(LED_STANDBY);
+  static int ledStatus = 0;
+  static int buzzerStatus = 0;
+  ledIndicator(ledStatus);
   if (bluetooth.available() > 0) {
     char recv = bluetooth.read();
+    if (recv == CONNECT) {
+      ledStatus = LED_STANDBY;
+    }
+    if (recv == BUZZERON) {
+      buzzerStatus = 1;
+    }
+    if (recv == BUZZEROFF) {
+      buzzerStatus = 0;
+    }
     if (recv == STARTING) {
       ledIndicator(LED_START);
+      digitalWrite(BUZZER, buzzerStatus ? 1 : 0);
       int statePoint = digitalRead(INPUT_A);
       unsigned long finalCounter = 0, startCounter = millis();
       while (true) {
@@ -49,6 +64,7 @@ void loop() {
         }
         finalCounter = millis();
       }
+      digitalWrite(BUZZER, 0);
       ledIndicator(LED_SENDING);
       bluetooth.print(finalCounter - startCounter);
       delay(500);
